@@ -647,7 +647,8 @@ int SCHSPreparePatterns(MpmCtx *mpm_ctx)
         const SCHSPattern *p = pd->parray[i];
 
         cd->ids[i] = i;
-        cd->flags[i] = HS_FLAG_SINGLEMATCH;
+        //cd->flags[i] = HS_FLAG_SINGLEMATCH;
+		cd->flags[i] = HS_FLAG_SOM_LEFTMOST;
         if (p->flags & MPM_PATTERN_FLAG_NOCASE) {
             cd->flags[i] |= HS_FLAG_CASELESS;
         }
@@ -882,6 +883,10 @@ typedef struct SCHSCallbackCtx_ {
     SCHSCtx *ctx;
     void *pmq;
     uint32_t match_count;
+	uint64_t from;
+	uint64_t to;
+	uint8_t *buf;
+	uint32_t buflen;
 } SCHSCallbackCtx;
 
 /* Hyperscan MPM match event handler */
@@ -898,7 +903,19 @@ static int SCHSMatchEvent(unsigned int id, unsigned long long from,
                " (pat id=%" PRIu32 ")",
                cctx->match_count, (uint32_t)id, (uintmax_t)to, pat->id);
 
-    PrefilterAddSids(pmq, pat->sids, pat->sids_size);
+	uint8_t *buf    = cctx->buf + from;
+	uint32_t buflen = (to-from);
+
+	cctx->from = from;
+	cctx->to   = to;
+
+	SCHSMatchInfo matchinfo;
+	memset(&matchinfo, 0, sizeof(SCHSMatchInfo));
+
+	matchinfo.buf_hyperscan     = buf;
+	matchinfo.buflen_hyperscan  = buflen;
+
+    PrefilterAddSids(pmq, pat->sids, pat->sids_size, &matchinfo);
 
     cctx->match_count++;
     return 0;
@@ -928,7 +945,7 @@ uint32_t SCHSSearch(const MpmCtx *mpm_ctx, MpmThreadCtx *mpm_thread_ctx,
         return 0;
     }
 
-    SCHSCallbackCtx cctx = {.ctx = ctx, .pmq = pmq, .match_count = 0};
+    SCHSCallbackCtx cctx = {.ctx = ctx, .pmq = pmq, .match_count = 0, .from=UINT64_MAX, .to=UINT64_MAX, .buf = buf, .buflen = buflen};
 
     /* scratch should have been cloned from g_scratch_proto at thread init. */
     hs_scratch_t *scratch = hs_thread_ctx->scratch;

@@ -33,6 +33,7 @@
  *  \retval -1 error
  *  \retval 0 ok
  */
+ extern uint32_t g_sig_array_len;
 int PmqSetup(PrefilterRuleStore *pmq)
 {
     SCEnter();
@@ -55,6 +56,28 @@ int PmqSetup(PrefilterRuleStore *pmq)
     // Don't need to zero memory since it is always written first.
 
     SCReturnInt(0);
+}
+
+int PmqSetup_match(PrefilterRuleStore *pmq)
+{
+	SCEnter();
+
+    if (pmq == NULL) {
+        SCReturnInt(-1);
+    }
+
+	pmq->buf = (uint8_t **)SCMalloc(g_sig_array_len * sizeof(uint8_t *));
+	if (NULL == pmq->buf){
+		SCReturnInt(-1);
+	}
+
+	pmq->buflen = (uint32_t *)SCMalloc(g_sig_array_len * sizeof(uint32_t));
+	if (NULL == pmq->buflen){
+		SCReturnInt(-1);
+	}
+
+	SCReturnInt(0);
+	
 }
 
 /** \brief Add array of Signature IDs to rule ID array.
@@ -130,3 +153,32 @@ void PmqFree(PrefilterRuleStore *pmq)
 
     PmqCleanup(pmq);
 }
+
+void PmqCleanup_backup(PrefilterRuleStore *pmq)
+{
+    if (pmq == NULL)
+        return;
+
+    if (pmq->buf != NULL) {
+        SCFree(pmq->buf);
+        pmq->buf = NULL;
+    }
+	
+
+    if (pmq->buflen != NULL) {
+        SCFree(pmq->buflen);
+        pmq->buflen = NULL;
+    }
+}
+
+/** \brief Cleanup and free a Pmq
+  * \param pmq Pattern matcher queue to be free'd.
+  */
+void PmqFree_match(PrefilterRuleStore *pmq)
+{
+    if (pmq == NULL)
+        return;
+
+    PmqCleanup_backup(pmq);
+}
+

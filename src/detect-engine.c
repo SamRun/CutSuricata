@@ -2334,6 +2334,8 @@ static TmEcode ThreadCtxDoInit (DetectEngineCtx *de_ctx, DetectEngineThreadCtx *
     PatternMatchThreadPrepare(&det_ctx->mtcu, de_ctx->mpm_matcher);
 
     PmqSetup(&det_ctx->pmq);
+	PmqSetup_match(&det_ctx->pmq);
+	det_ctx->pmq.flag = 1;
 
     det_ctx->spm_thread_ctx = SpmMakeThreadCtx(de_ctx->spm_global_thread_ctx);
     if (det_ctx->spm_thread_ctx == NULL) {
@@ -2581,6 +2583,7 @@ static void DetectEngineThreadCtxFree(DetectEngineThreadCtx *det_ctx)
     }
 
     PmqFree(&det_ctx->pmq);
+	PmqFree_match(&det_ctx->pmq);
 
     if (det_ctx->spm_thread_ctx != NULL) {
         SpmDestroyThreadCtx(det_ctx->spm_thread_ctx);

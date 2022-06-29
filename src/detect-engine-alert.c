@@ -204,6 +204,8 @@ int PacketAlertAppend(DetectEngineThreadCtx *det_ctx, const Signature *s,
         p->alerts.alerts[p->alerts.cnt].flags = flags;
         p->alerts.alerts[p->alerts.cnt].s = s;
         p->alerts.alerts[p->alerts.cnt].tx_id = tx_id;
+		p->alerts.alerts[p->alerts.cnt].buf    = s->buf;
+		p->alerts.alerts[p->alerts.cnt].buflen = s->buflen;
     } else {
         /* We need to make room for this s->num
          (a bit ugly with memcpy but we are planning changes here)*/
@@ -218,6 +220,8 @@ int PacketAlertAppend(DetectEngineThreadCtx *det_ctx, const Signature *s,
         p->alerts.alerts[i].flags = flags;
         p->alerts.alerts[i].s = s;
         p->alerts.alerts[i].tx_id = tx_id;
+		p->alerts.alerts[i].buf    = s->buf;
+		p->alerts.alerts[i].buflen = s->buflen;
     }
 
     /* Update the count */

@@ -274,6 +274,8 @@ typedef struct PacketAlert_ {
     uint8_t flags;
     const struct Signature_ *s;
     uint64_t tx_id;
+	uint8_t *buf;
+	uint32_t buflen;
 } PacketAlert;
 
 /** After processing an alert by the thresholding module, if at

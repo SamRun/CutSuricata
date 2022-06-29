@@ -178,6 +178,10 @@ void PmqReset(PrefilterRuleStore *);
 void PmqCleanup(PrefilterRuleStore *);
 void PmqFree(PrefilterRuleStore *);
 
+int PmqSetup_match(PrefilterRuleStore *);
+void PmqCleanup_backup(PrefilterRuleStore *);
+void PmqFree_match(PrefilterRuleStore *);
+
 void MpmTableSetup(void);
 void MpmRegisterTests(void);
 

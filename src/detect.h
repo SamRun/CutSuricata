@@ -561,6 +561,9 @@ typedef struct Signature_ {
 
     SignatureInitData *init_data;
 
+	uint8_t *buf;
+	uint32_t buflen;
+
     /** ptr to the next sig in the list */
     struct Signature_ *next;
 } Signature;

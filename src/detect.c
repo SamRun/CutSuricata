@@ -130,6 +130,14 @@ static void DetectRun(ThreadVars *th_v,
     /* run the prefilters for packets */
     DetectRunPrefilterPkt(th_v, de_ctx, det_ctx, p, &scratch);
 
+	for (uint32_t i = 0; i < det_ctx->pmq.rule_id_array_cnt; ++i){
+		Signature *s = de_ctx->sig_array[ det_ctx->pmq.rule_id_array[i] ];
+
+		//$)AP/4x2NSkF%Ed5DhyperscanWV7{4.5DV8UkSk3$6HPEO"
+		s->buf     =  det_ctx->pmq.buf[ det_ctx->pmq.rule_id_array[i] ];
+		s->buflen  =  det_ctx->pmq.buflen[ det_ctx->pmq.rule_id_array[i] ];
+	}
+
     PACKET_PROFILING_DETECT_START(p, PROF_DETECT_RULES);
     /* inspect the rules against the packet */
     DetectRulePacketRules(th_v, de_ctx, det_ctx, p, pflow, &scratch);
@@ -1405,7 +1413,14 @@ static void DetectRunTx(ThreadVars *tv,
             }
 
             for (uint32_t i = 0; i < det_ctx->pmq.rule_id_array_cnt; i++) {
-                const Signature *s = de_ctx->sig_array[det_ctx->pmq.rule_id_array[i]];
+                //const Signature *s = de_ctx->sig_array[det_ctx->pmq.rule_id_array[i]];
+
+				Signature *s = de_ctx->sig_array[det_ctx->pmq.rule_id_array[i]];
+				
+				//$)AP/4x2NSkF%Ed5DhyperscanWV7{4.5DV8UkSk3$6HPEO"
+				s->buf     =  det_ctx->pmq.buf[ det_ctx->pmq.rule_id_array[i] ];
+				s->buflen  =  det_ctx->pmq.buflen[ det_ctx->pmq.rule_id_array[i] ];
+			
                 const SigIntId id = s->num;
                 det_ctx->tx_candidates[array_idx].s = s;
                 det_ctx->tx_candidates[array_idx].id = id;
@@ -1539,6 +1554,7 @@ static void DetectRunTx(ThreadVars *tv,
 
             /* call individual rule inspection */
             RULE_PROFILING_START(p);
+			//util-spm-hs.c HSScan
             const int r = DetectRunTxInspectRule(tv, de_ctx, det_ctx, p, f, flow_flags,
                     alstate, &tx, s, inspect_flags, can, scratch);
             if (r == 1) {

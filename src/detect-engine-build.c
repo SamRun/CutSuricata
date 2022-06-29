@@ -1281,6 +1281,7 @@ static DetectPort *RulesGroupByPorts(DetectEngineCtx *de_ctx, int ipproto, uint3
  * \retval  0 on success
  * \retval -1 on failure
  */
+ uint32_t g_sig_array_len = 0;
 int SigAddressPrepareStage1(DetectEngineCtx *de_ctx)
 {
     Signature *tmp_s = NULL;
@@ -1295,6 +1296,7 @@ int SigAddressPrepareStage1(DetectEngineCtx *de_ctx)
     }
 
     de_ctx->sig_array_len = DetectEngineGetMaxSigId(de_ctx);
+	g_sig_array_len = de_ctx->sig_array_len;
     de_ctx->sig_array_size = (de_ctx->sig_array_len * sizeof(Signature *));
     de_ctx->sig_array = (Signature **)SCMalloc(de_ctx->sig_array_size);
     if (de_ctx->sig_array == NULL)

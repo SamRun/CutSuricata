@@ -39,7 +39,15 @@ typedef struct PrefilterRuleStore_ {
     /* The number of slots allocated for storing rule IDs */
     uint32_t rule_id_array_size;
 
+	uint8_t **buf;
+	uint32_t *buflen;
+	uint8_t  flag;  // 0:others ; 1:det_ctx
 } PrefilterRuleStore;
+
+typedef struct SCHSMatchInfo_ {
+	uint8_t *buf_hyperscan;
+	uint32_t buflen_hyperscan;
+}SCHSMatchInfo;
 
 /* Resize Signature ID array. Only called from MpmAddSids(). */
 int PrefilterAddSidsResize(PrefilterRuleStore *pmq, uint32_t new_size);
@@ -55,7 +63,7 @@ int PrefilterAddSidsResize(PrefilterRuleStore *pmq, uint32_t new_size);
  *
  */
 static inline void
-PrefilterAddSids(PrefilterRuleStore *pmq, SigIntId *sids, uint32_t sids_size)
+PrefilterAddSids(PrefilterRuleStore *pmq, SigIntId *sids, uint32_t sids_size, SCHSMatchInfo *matchinfo)
 {
     if (sids_size == 0)
         return;
@@ -73,6 +81,13 @@ PrefilterAddSids(PrefilterRuleStore *pmq, SigIntId *sids, uint32_t sids_size)
     SigIntId *ptr = pmq->rule_id_array + pmq->rule_id_array_cnt;
     SigIntId *end = ptr + sids_size;
     do {
+		if (matchinfo && (1 == pmq->flag)){
+			uint8_t **ptr_buf     = pmq->buf;
+			uint32_t *ptr_buflen  = pmq->buflen;
+
+			ptr_buf[*sids]      =  matchinfo->buf_hyperscan;
+			ptr_buflen[*sids]   =  matchinfo->buflen_hyperscan;
+		}
         *ptr++ = *sids++;
     } while (ptr != end);
     pmq->rule_id_array_cnt += sids_size;
